@@ -15,50 +15,92 @@ It provides:
 A tiny browser page exercises the tools. It is a verification **fixture** (sample
 input for checks), not an application starter.
 
-## Quickstart: create a project and try Pi
+## Choose how to use it
 
 You need Git, npm, and a compatible Node.js installation. Node.js 24.22.2 with
 npm 11.19.1 was used for validation. Vite, the browser development/build tool,
 requires Node.js 20.19+ or 22.12+; current Pi requires Node.js 22.19 or newer.
-Use Node.js 24 to satisfy both for this walkthrough.
+Use Node.js 24 to satisfy both.
 
-1. Open [the template on GitHub](https://github.com/rfranr/agentic-dev-template).
-   Choose **Use this template → Create a new repository** and name it `my-project`.
-   This creates independent Git history; do not copy the template's `.git` directory.
-2. Run these commands, entering the owner of your new repository when prompted:
+### 1. Try locally
 
-   ```sh
-   printf 'GitHub username or organization: '
-   read -r GITHUB_OWNER
-   git clone "https://github.com/$GITHUB_OWNER/my-project.git"
-   cd my-project
-   npm ci
-   npm run check:report
-   ```
+No GitHub repository is required. From the directory containing your local
+`agentic-dev-template` checkout, copy its committed files without Git history:
 
-   `npm ci` installs the local development tools at the versions recorded in
-   `package-lock.json`. The next command runs the checks and reports described below.
-3. Use your existing Pi installation and model configuration. From the project directory:
+```sh
+mkdir my-experiment
+git -C agentic-dev-template archive HEAD | tar -x -C my-experiment
+cd my-experiment
+npm ci
+npm run check:report
+```
 
-   ```sh
-   pi
-   ```
+This includes hidden configuration files, but not `.git`, installed dependencies,
+or uncommitted changes. You can now experiment without affecting the template.
+`npm ci` installs the tool versions recorded in `package-lock.json`;
+`check:report` runs the checks and reports described below.
 
-   Review the third-party package declarations in `.pi/settings.json` before
-   granting project trust or loading them. Pi manages these packages separately
-   from `npm ci`; the repository does not bundle a global Pi installation or
-   authentication store. If you do not have Pi, install it using its
-   [installation instructions](https://github.com/earendil-works/pi/tree/main/packages/coding-agent#getting-started).
-   For a built-in provider, use `/login` inside Pi to configure access if needed,
-   then `/model` to select a model you have configured.
-4. Try this prompt in Pi:
+### 2. Create a project
 
-   ```text
-   Read AGENTS.md and TASK.md. Inspect this repository and explain which files
-   are the verification fixture and which are reusable tooling. Do not modify files yet.
-   ```
+Choose either route:
 
-For actual development, replace `TASK.md` with your assignment. Agents choose
+- **GitHub:** if [this repository](https://github.com/rfranr/agentic-dev-template)
+  is configured as a GitHub template, choose **Use this template → Create a new
+  repository**. Clone your new repository, then run `npm ci` and
+  `npm run check:report` inside it.
+- **Local:** make a copy using the steps above, then start independent history
+  from inside `my-experiment`:
+
+  ```sh
+  git init
+  git add .
+  git commit -m "Initialize project from template"
+  ```
+
+Neither route inherits the template's Git history. Rename the local directory
+as desired; do not copy the template's `.git` directory into your project.
+
+### 3. Improve the template itself
+
+Work directly in your `agentic-dev-template` checkout, not a consuming project.
+Edit the relevant files, validate them, review the diff, and commit normally:
+
+```sh
+cd agentic-dev-template
+# Make your changes, then:
+npm run format
+npm run check:report
+git diff
+# Stage only the intended files:
+git add README.md  # example for a README change
+git commit -m "Clarify template usage"
+```
+
+Ordinary template maintenance needs no separate pilot or promotion process.
+
+### Use Pi in any of these workflows
+
+From the directory you are working in, launch your existing Pi installation:
+
+```sh
+pi
+```
+
+Review the third-party package declarations in `.pi/settings.json` before
+loading them or granting project trust. Pi installs these separately from
+`npm ci`; no global Pi installation or authentication store is bundled. If needed,
+follow Pi's [installation instructions](https://github.com/earendil-works/pi/tree/main/packages/coding-agent#getting-started).
+Inside Pi, use `/login` to configure a built-in provider if needed and `/model`
+to select a configured model.
+
+A first prompt can be:
+
+```text
+Read AGENTS.md and TASK.md. Explain which files are the verification fixture
+and which are reusable tooling. Do not modify files yet.
+```
+
+For development, replace `TASK.md` with your assignment. Agents choose
 implementation details within its boundaries. Review their diff and verification
 results; no task-management system is required. See [AGENTS.md](AGENTS.md).
 
@@ -150,19 +192,19 @@ per task. Retain useful assignments under `docs/tasks/` when helpful.
 
 ## Contributing improvements
 
-Start a project from this template and develop normally. When friction or a
-missing capability appears, fix it in the project and validate it there first.
-Separate project-specific behavior from reusable environment changes. Propose
-the reusable portion back to `agentic-dev-template` with a short account of the
-problem, change, validation, and relevant limitations for human review.
+For template maintenance, work directly in `agentic-dev-template` as described
+above: change, check, and commit. No separate approval ceremony, pilot, or
+contribution process is required.
 
-For example, an import rule tied to your application may belong only in your
-project; a correction to how a shared report handles failures may be reusable.
+If you discover an improvement while developing a consuming project, you may
+optionally propose the reusable part back to the template. Briefly explain the
+problem, fix, and validation. Application-specific rules can stay in your project;
+a correction to a shared report may help other users.
 
 Agents may suggest improvements but must not modify the template from a consuming
-project without explicit authorization. Project and template Git histories remain
-independent. There is no automatic propagation, synchronization framework,
-submodule, generator, mandatory retrospective, issue tracker, or promotion ceremony.
+project without explicit authorization. Project and template Git histories stay
+independent; nothing propagates automatically. No synchronization framework,
+submodule, generator, retrospective, issue tracker, or promotion ceremony is required.
 
 ## Technical reference and known limitations
 
