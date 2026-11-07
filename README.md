@@ -229,9 +229,9 @@ this extraction does not silently choose one or install a global skill.
 
 ### Known limitations
 
-- The `structure` command uses a shell pipeline. A dependency-cruiser failure can
-  be hidden if it still produces JSON that the downstream reporter accepts: the
-  pipeline returns the reporter's status. The command has not been changed.
+- The `structure` command runs dependency-cruiser and the reporter in sequence.
+  Failures from either step now stop the command with a nonzero exit code; the
+  output and advisory metrics themselves are unchanged.
 - Pi package loading, model access, and skill-source provenance remain unverified
   in the extracted environment; browser and platform coverage are limited.
 - The fixture checks tools, not a consuming application's behavior. Passing checks
