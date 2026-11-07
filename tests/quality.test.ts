@@ -27,3 +27,19 @@ test('runtime globals are scoped and undeclared names still fail', async () => {
 
   assert.equal(nodeOnly.messages[0].ruleId, 'no-undef');
 });
+
+test('maintained scripts use Node globals without allowing browser or unknown globals', async () => {
+  const eslint = new ESLint();
+  const [valid] = await eslint.lintText(
+    'export const runtime = [process, console, URL, AbortController, AbortSignal, setTimeout, clearTimeout];',
+    { filePath: 'scripts/runtime-probe.mjs' },
+  );
+
+  assert.equal(valid.errorCount, 0);
+  const [invalid] = await eslint.lintText('export const runtime = [window, missingName];', {
+    filePath: 'scripts/runtime-probe.mjs',
+  });
+
+  assert.equal(invalid.errorCount, 2);
+  assert.ok(invalid.messages.every((message) => message.ruleId === 'no-undef'));
+});

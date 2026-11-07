@@ -1,4 +1,4 @@
-const fs = require('node:fs');
+import fs from 'node:fs';
 
 const report = JSON.parse(fs.readFileSync(0, 'utf8'));
 
@@ -18,13 +18,17 @@ function reachable(start) {
 
   function visit(node) {
     for (const next of graph.get(node) ?? []) {
-      if (next === start || visited.has(next)) continue;
+      if (next === start || visited.has(next)) {
+        continue;
+      }
+
       visited.add(next);
       visit(next);
     }
   }
 
   visit(start);
+
   return visited.size;
 }
 

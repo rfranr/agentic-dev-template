@@ -51,9 +51,10 @@ failures still cause aggregate failure.
 ### Coverage and adaptation
 
 Formatting scans `src/` and `tests/` for `.ts`, `.js`, and `.mjs`. Lint and cognitive
-analysis cover both directories; lint also covers `scripts/check-report.mjs`, as
-in WorldGL. Other reporting scripts/configuration are not silently added to lint
-or formatting coverage. TypeScript includes `src` and `tests`.
+analysis cover both directories; lint additionally covers all maintained code in
+`scripts/`, with Node.js globals scoped to those scripts. Reporting scripts and
+configuration are not added to formatting coverage. TypeScript includes `src`
+and `tests`.
 
 Metrics scan both directories, but `tsmetrics` skips `.mjs`; ESLint/cognitive
 analysis cover JavaScript. Dependency entry points are `src/` and `tests/*.ts`;

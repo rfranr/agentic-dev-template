@@ -73,5 +73,28 @@ make the test pass.
   reporting script. `.mjs` is not analyzed by `tsmetrics`.
 - Licensing requires human resolution before public distribution.
 
-WorldGL was not modified. No commit was made. Generated dependencies, build
-output, metrics HTML, and temporary probes are not part of the proposed Git diff.
+At extraction time, WorldGL was not modified and no commit was made. Generated
+dependencies, build output, metrics HTML, and temporary probes were excluded.
+
+## Maintenance: TASK6
+
+ESLint now covers all maintained scripts. Newly exposed violations were missing
+braces/spacing and a CommonJS `require` rejected by the existing rules. The
+structural reporter now uses an ESM import in `scripts/structure.mjs`; its graph
+algorithm and output are unchanged. No rules, thresholds, dependencies, Vite
+configuration, or browser fixture changed.
+
+Verification after maintenance:
+
+- `format`, `format:check`, `check:report`, and `metrics:html` passed.
+- 3 tests passed; lint and TypeScript/Vite build passed.
+- Cognitive total 0, maximum 0, 0 violations; metrics reported no warnings.
+- Dependency validation found no violations; maximum first-party depth stayed 1.
+- Temporary probes confirmed warning-only lint success, blocking complexity lint,
+  informational complexity-report `FAIL` with exit zero, warning-level cycles,
+  and aggregate failure retention while later reports continued.
+- Structural output matched the previous CommonJS reporter on a cyclic graph
+  with a test entry. Temporary probes were removed before final verification.
+
+The aggregate runner and its gate/report semantics remain unchanged. Pi runtime
+and additional browser validation were not repeated for this maintenance pass.

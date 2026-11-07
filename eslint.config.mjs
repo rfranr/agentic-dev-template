@@ -42,7 +42,6 @@ export default tseslint.config(
           ignoreUrls: true,
           ignoreTemplateLiterals: true,
           ignoreStrings: true,
-          ignoreTemplateLiterals: true,
         },
       ],
       
@@ -99,9 +98,9 @@ export default tseslint.config(
     },
   },
 
-  // Node.js verification fixtures
+  // Node.js verification fixtures and maintained scripts
   {
-    files: ["tests/**/*.ts", "tests/**/*.mjs"],
+    files: ["tests/**/*.ts", "tests/**/*.mjs", "scripts/**/*.{js,mjs,cjs,ts}"],
     languageOptions: {
       globals: {
         process: "readonly",

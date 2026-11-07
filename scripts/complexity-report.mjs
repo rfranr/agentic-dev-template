@@ -28,7 +28,9 @@ for (const result of results) {
   const rule = config?.rules?.[RULE];
   const enabled = rule && rule[0] !== 0;
 
-  if (!enabled) continue;
+  if (!enabled) {
+    continue;
+  }
 
   const limit = Array.isArray(rule[1])
     ? rule[1][0]
@@ -41,7 +43,9 @@ for (const result of results) {
       );
     }
 
-    if (message.ruleId !== RULE) continue;
+    if (message.ruleId !== RULE) {
+      continue;
+    }
 
     const match = message.message.match(
       /Cognitive Complexity from (\d+) to the \d+ allowed/,

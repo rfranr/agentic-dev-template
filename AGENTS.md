@@ -14,13 +14,15 @@ After modifying source code:
 1. Run `npm run format`.
 2. Run `npm run check:report`.
 3. Review ESLint violations, cognitive complexity, dependency and structure reports.
-4. Resolve violations through meaningful improvements, without weakening thresholds, disabling rules or adding suppressions.
+4. Resolve blocking violations through meaningful improvements, without weakening thresholds, disabling rules or adding suppressions.
 5. Do not modify existing tests solely to make them pass.
-6. Repeat formatting and verification until all checks pass.
+6. Repeat formatting and verification until blocking quality gates pass and all report commands execute successfully.
 7. Prefer cohesive modules, clear dependencies, limited shared mutable state and minimal indirection.
 8. Report remaining violations and relevant metric changes.
 
-**A task is complete only when all quality checks pass.**
+**Blocking quality gates must pass before completion. Informational reports must be reviewed and their findings reported, but findings do not automatically block completion. Command execution failures remain blocking, including failures to execute informational reports.**
+
+`check` enforces lint, tests, and build. Cognitive limits are enforced by lint; the cognitive report, TypeScript metrics, and structural metrics are informational. Dependency cycles retain warning severity. `check:report` retains nonzero command results; a report's printed findings are not themselves a new exit-code gate.
 **Do not install dependencies or modify the environment without explicit approval.**
 
 If a check cannot pass within these constraints, report the blocker instead of bypassing it.
