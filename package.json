@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "tsx --test tests/*.test.ts",
+    "test": "tsx --test tests/*.test.ts tests/*.test.mjs",
     "format": "prettier --write \"{src,tests}/**/*.{ts,js,mjs}\"",
     "format:check": "prettier --check \"{src,tests}/**/*.{ts,js,mjs}\"",
     "lint": "eslint src/ tests/ scripts/",
@@ -15,7 +15,7 @@
     "metrics": "tsmetrics analyze ./src ./tests",
     "metrics:html": "tsmetrics analyze ./src ./tests --format html > metrics.html",
     "dependencies": "depcruise --config .dependency-cruiser.cjs -T err src/ tests/*.ts",
-    "structure": "depcruise --no-config --include-only '^(src/|tests/)(?!node_modules/)' -T json src/ tests/*.ts | node scripts/structure.mjs",
+    "structure": "node scripts/run-structure.mjs",
     "check": "npm run lint && npm test && npm run build",
     "check:report": "node scripts/check-report.mjs"
   },
