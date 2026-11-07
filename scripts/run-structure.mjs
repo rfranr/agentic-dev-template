@@ -1,11 +1,13 @@
 import { spawnSync } from 'node:child_process';
+import { readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
 export function runStructure(run = spawnSync) {
+  const tests = readdirSync('tests').filter((file) => file.endsWith('.ts')).map((file) => `tests/${file}`);
   const cruise = run(
     'npm',
-    ['exec', '--', 'depcruise', '--no-config', '--include-only', '^(src/|tests/)(?!node_modules/)', '-T', 'json', 'src/', 'tests/*.ts'],
+    ['exec', '--', 'depcruise', '--no-config', '--include-only', '^(src/|tests/)(?!node_modules/)', '-T', 'json', 'src/', ...tests],
     { encoding: 'utf8' },
   );
 
