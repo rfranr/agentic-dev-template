@@ -326,7 +326,7 @@ test('external methodology is delivered unchanged with complete approval and val
     'fresh Pi session',
     'trusting/loading',
     'actual delivered tools',
-    'do not interpret silence as approval',
+    'Do not equate silence with approval',
     'do not create an adoption database or lockfile',
   ]) {
     assert.ok(task.includes(expected), expected);
