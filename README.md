@@ -60,6 +60,69 @@ Choose either route:
 Neither route inherits the template's Git history. Rename the local directory
 as desired; do not copy the template's `.git` directory into your project.
 
+### Adopt into an existing project (experimental)
+
+Before starting Pi, run the standalone bootstrap with Node.js 24:
+
+```sh
+node /absolute/path/to/agentic-dev-template/scripts/bootstrap.mjs /path/to/existing-project
+```
+
+No npm dependencies or Pi installation are needed for this command. The explicit
+[resource manifest](adoption/resources.json) is the installation inventory: each
+entry names a source, destination, and `direct` or `staged` kind. Additions and
+removals require manifest edits; bootstrap never recursively discovers resources.
+It delivers bundled Skills into `.pi/skills/`, prepares `.pi/settings.json` and
+`.pi-lens.json`, and snapshots actual quality scripts, configurations, and package
+command/dependency references under `.agentic-adoption/staging/`, preserving relative
+paths. It does not execute tooling, edit application files, modify existing package
+files or quality configurations, or run installation commands.
+
+The [adoption methodology](adoption/TASK.md) is copied unchanged to
+`.agentic-adoption/TASK.md`. Generated project-specific information is separate:
+`.agentic-adoption/RESULT.json` records each manifest resource's source, destination,
+kind and outcome. `installed` means copied or already identical; `conflict` means
+preserved, not installed. Terminal output distinguishes copied and identical files.
+The result does not inventory itself; its status appears in terminal output.
+
+Bootstrap validates the entire plan before writing: sources must be available
+regular files, paths must stay within their roots, destinations must not overlap,
+and staged resources must retain their relative paths. Source/target overlap and
+symlinked target paths are rejected. Symlinks at source paths are rejected; symlinks
+inside the target are preserved as conflicts, never followed.
+
+- Invalid plans or missing sources stop with no writes, even to a new target directory.
+- Expected conflicts are identified before copying. Conflicting paths remain untouched;
+  other resources are installed. Bootstrap does not merge or upgrade existing files.
+- Identical resources remain untouched. Unchanged reruns preserve file bytes and
+  modification times, including the generated result.
+- Conflicting task/result files are preserved; proposed contents are printed. Use that
+  terminal output rather than a potentially stale on-disk result.
+- Unexpected I/O errors stop installation without rollback. Earlier copies remain;
+  resolve the error and rerun. Do not concurrently edit the source or destination
+  during bootstrap; this is not a transactional installer.
+
+Exit status is 0 on success, 1 for conflicts or errors. Resolve conflicts manually
+and rerun before adoption, or give the agent the printed result for an approved
+resolution plan.
+
+Review the prepared files and Pi package declarations before granting trust or
+allowing Pi to install third-party packages. Then start a **fresh** Pi session in
+the target project and ask:
+
+```text
+Read .agentic-adoption/TASK.md and existing project instructions. Inspect the
+project, conduct the interactive quality-policy wizard, and propose an adaptation
+plan. Wait for my approval before changing files or installing dependencies.
+```
+
+Copying and conflict detection are deterministic. Project inspection, policy and
+threshold choices, dependency installation, configuration integration, and validation
+remain the agent's responsibility after human approval. Staged package files and
+TypeScript/Vite configurations are references, not replacements for the project's
+manifest, lockfile, or build system. Template fixtures and root agent instructions
+are not installed.
+
 ### 3. Improve the template itself
 
 Work directly in your `agentic-dev-template` checkout, not a consuming project.
@@ -167,6 +230,7 @@ not part of `check:report`.
    ```
 
    The test command does not install a browser, and browser tests need no model request.
+
 4. **Check coverage when paths change.** Update affected package scripts, ESLint
    runtime bindings, cognitive inputs, and structural filters together. Runtime
    bindings declare names available in a particular environment, such as Node's
@@ -212,19 +276,19 @@ submodule, generator, retrospective, issue tracker, or promotion ceremony is req
 
 All command names below are invoked with `npm run`, for example `npm run lint`.
 
-| Command | Purpose |
-| --- | --- |
-| `dev` / `preview` | Serve development files / built browser output |
-| `format` / `format:check` | Write formatting / check without mutation |
-| `lint` | ESLint correctness, readability, and complexity rules |
-| `test` | TypeScript tests through `tsx` and Node's test runner |
-| `build` | TypeScript checking, then Vite build |
-| `check` | Lint → tests → build; stops at the first failing group |
-| `complexity` | Informational cognitive totals, maximum, and configured-limit findings |
-| `metrics` / `metrics:html` | `tsmetrics` reports; HTML writes ignored `metrics.html` |
-| `dependencies` | Dependency-cruiser validation, including warning-level cycles |
-| `structure` | Project-owned fan-out, transitive counts, and depth; no thresholds |
-| `check:report` | Runs `check`, then all four report commands; retains their failure statuses |
+| Command                    | Purpose                                                                     |
+| -------------------------- | --------------------------------------------------------------------------- |
+| `dev` / `preview`          | Serve development files / built browser output                              |
+| `format` / `format:check`  | Write formatting / check without mutation                                   |
+| `lint`                     | ESLint correctness, readability, and complexity rules                       |
+| `test`                     | TypeScript tests through `tsx` and Node's test runner                       |
+| `build`                    | TypeScript checking, then Vite build                                        |
+| `check`                    | Lint → tests → build; stops at the first failing group                      |
+| `complexity`               | Informational cognitive totals, maximum, and configured-limit findings      |
+| `metrics` / `metrics:html` | `tsmetrics` reports; HTML writes ignored `metrics.html`                     |
+| `dependencies`             | Dependency-cruiser validation, including warning-level cycles               |
+| `structure`                | Project-owned fan-out, transitive counts, and depth; no thresholds          |
+| `check:report`             | Runs `check`, then all four report commands; retains their failure statuses |
 
 ### Exact coverage
 
