@@ -314,7 +314,7 @@ test('external methodology is delivered unchanged with complete approval and val
     'Do not silently turn template blocking rules into advisory rules',
     'entire relevant template policy',
     'including severities and thresholds',
-    'concrete deviation',
+    'template recommendation',
     'explicit human authorization BEFORE',
     'Dependency and configuration changes',
     'thresholds',
