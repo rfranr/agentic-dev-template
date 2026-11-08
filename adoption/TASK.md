@@ -37,7 +37,7 @@ Review Pi package declarations before trusting/loading them: starting Pi may off
 to install third-party packages; bootstrap did not install or pin those packages.
 Do not install unreviewed packages or overwrite existing Pi settings.
 
-## Inspect, reconcile, and approve once
+## Inspect and reconcile before discussion
 
 Inspect existing agent instructions, approved policies, languages, runtime, package manager,
 source layout, tests, build system, CI, configurations, and command coverage.
@@ -57,43 +57,66 @@ or genuinely inapplicable, with evidence and reasons. These are discussion aids,
 machine-readable states. Existing configuration and documented policies are sufficient;
 do not create an adoption database or lockfile.
 
-Use the existing project as the primary source of truth.
-
-**Do not conduct a multi-question quality-policy wizard.**
-
-Apply the following decision principles when preparing the integration proposal:
+Use the existing project as the primary source of truth:
 
 - Preserve existing conventions, tooling, commands, and quality gates.
-- Infer runtime, paths, globals, and package manager from the project.
-- Propose appropriate defaults only where no existing policy exists.
-- Introduce new complexity thresholds as advisory by default.
+- Infer routine facts such as runtime, paths, globals, and package manager.
+- Propose defaults only where no approved policy exists; new complexity thresholds
+  are advisory by default.
 - Report existing technical debt without automatically fixing it.
-- Never weaken existing blocking quality gates.
+- Never weaken existing blocking gates.
 - Do not introduce CI changes without explicit approval.
 - Do not install unreviewed Pi packages or optional native tooling.
 - Do not modify application logic or existing tests merely to satisfy new tooling.
 
-Present **one concise integration proposal** containing:
+## Discuss capabilities conversationally
 
-1. What will be installed and integrated.
-2. Which existing project conventions will be preserved.
-3. Which new quality rules will be blocking versus advisory.
-4. Any meaningful conflicts, risks, or exceptions.
-5. The commands that will validate the integration.
+Adoption is a collaborative engineering discussion, not a fixed questionnaire
+and not a single all-or-nothing presentation of policy choices.
 
-Obtain **explicit human approval BEFORE** modifying files, installing dependencies,
-or running commands that write project files. Ask for **one approval of the complete
-proposal**; silence is not approval. Include dependency changes, coverage gaps, and
-reasons for any inapplicable tooling. If nothing needs changing, report that outcome
-without repeating policy negotiations or dependency installation.
+After the initial inspection, discuss applicable capabilities **one at a time**,
+following their recipes. For each capability that needs a decision:
 
-Only ask individual questions when a genuine ambiguity, significant trade-off, or conflicting requirement cannot be resolved safely from existing project evidence.
+1. Briefly describe the evidence: what already exists, what is missing, and what
+   would need to change.
+2. Recommend a project-specific approach and explain only meaningful trade-offs.
+   Include proposed coverage, dependencies, and blocking versus advisory behavior
+   where relevant.
+3. Ask **one focused, open-ended question** and wait for the human's response.
+   Allow discussion, alternatives, or adjustments before recording the decision.
+4. Retain the agreed choice for the combined integration plan, then move to the
+   next capability. Do not edit files, install dependencies, or execute commands
+   that write project files during this discussion.
 
-Do not ask the human to confirm inferred facts or routine defaults.
+Do not present eight questions at once or turn the recipes into a compliance form.
+Do not ask for confirmation of inferred facts or routine implementation details.
+If a capability already satisfies established policy, acknowledge it briefly and
+move on without demanding a new decision. If inapplicable, state why.
+Related capabilities may be discussed together when separating them would repeat
+the same decision; do not skip a meaningful choice merely to shorten the discussion.
 
-After approval, proceed with integration and validation without requesting a second approval for the same decisions.
+Reuse existing documented and approved decisions. On subsequent runs, discuss
+only new, conflicting, or materially changed policies or integrations. Do not
+renegotiate unchanged choices, and do not interpret silence as approval.
 
-If new findings require changes outside the approved scope, explain the difference and request additional approval only for those changes.
+## Confirm integration and execute
+
+After the capability discussions, present **one concise combined plan** summarizing:
+
+1. Which tools and scripts will be integrated, retained, or treated as inapplicable.
+2. The agreed policies, coverage, and blocking versus advisory gates.
+3. Dependency and configuration changes, meaningful risks, and unresolved conflicts.
+4. Validation commands and expected report coverage.
+
+Obtain **explicit human authorization BEFORE** modifying files, installing
+dependencies, or running commands that write project files. This final authorization
+permits implementation of the decisions already discussed; it is not an invitation
+to repeat the wizard or request another approval for the same decisions.
+
+If the human changes a choice, reconcile that capability and update the plan.
+If nothing needs changing, report that outcome without requesting permission for
+unnecessary work. If implementation uncovers changes outside the approved scope,
+explain the delta and request approval for that delta only.
 
 ## Apply approved adaptations
 
