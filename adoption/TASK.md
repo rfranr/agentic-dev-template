@@ -57,12 +57,20 @@ or genuinely inapplicable, with evidence and reasons. These are discussion aids,
 machine-readable states. Existing configuration and documented policies are sufficient;
 do not create an adoption database or lockfile.
 
-Use the existing project as the primary source of truth:
+Use the existing project as the source of truth for its technical environment,
+existing explicit policies, and working quality gates. Use the **template's complete
+configuration as the proposed baseline** for each missing capability: formatting
+style, lint rules, complexity thresholds, severities, and command behavior.
+Do not silently turn template blocking rules into advisory rules (or vice versa).
+Template defaults are proposals, never automatic authorization; an existing
+approved project policy takes precedence and any deviation must be visible.
 
-- Preserve existing conventions, tooling, commands, and quality gates.
 - Infer routine facts such as runtime, paths, globals, and package manager.
-- Propose defaults only where no approved policy exists; new complexity thresholds
-  are advisory by default.
+- Adapt template paths, commands, and dependency versions to the project without
+  treating those mechanical adaptations as new policy choices.
+- Identify concrete incompatibilities, existing-policy conflicts, and consequential
+  effects of adopting the baseline, such as current violations of blocking rules
+  or widespread formatting changes; discuss those explicitly.
 - Report existing technical debt without automatically fixing it.
 - Never weaken existing blocking gates.
 - Do not introduce CI changes without explicit approval.
@@ -79,17 +87,24 @@ following their recipes. For each capability that needs a decision:
 
 1. Briefly describe the evidence: what already exists, what is missing, and what
    would need to change.
-2. Recommend a project-specific approach and explain only meaningful trade-offs.
-   Include proposed coverage, dependencies, and blocking versus advisory behavior
-   where relevant.
-3. Ask **one focused, open-ended question** and wait for the human's response.
-   Allow discussion, alternatives, or adjustments before recording the decision.
-4. Retain the agreed choice for the combined integration plan, then move to the
+2. Propose adopting the **entire relevant template policy** as one baseline:
+   configuration, rules, thresholds, and severities. State necessary project-specific
+   adaptations and any material trade-offs or existing-policy conflicts.
+3. Ask **one focused question about accepting the template baseline or a concrete
+   deviation**; wait for the human's response. Do not ask the human to invent
+   alternatives without first supplying the template recommendation.
+4. If the human says "adopt the template", treat the whole capability policy as
+   agreed, including severities and thresholds, except for explicitly discussed
+   conflicts. Do not reopen subchoices that the answer already settles.
+5. Retain the agreed choice for the combined integration plan, then move to the
    next capability. Do not edit files, install dependencies, or execute commands
    that write project files during this discussion.
 
 Do not present eight questions at once or turn the recipes into a compliance form.
 Do not ask for confirmation of inferred facts or routine implementation details.
+Do not default new lint/complexity rules to advisory merely to avoid discussing
+template blockers. An approved blocking rule that exposes existing debt is a
+reported blocker, not permission to silently refactor or suppress that debt.
 If a capability already satisfies established policy, acknowledge it briefly and
 move on without demanding a new decision. If inapplicable, state why.
 Related capabilities may be discussed together when separating them would repeat
