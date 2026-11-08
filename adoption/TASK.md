@@ -77,42 +77,54 @@ approved project policy takes precedence and any deviation must be visible.
 - Do not install unreviewed Pi packages or optional native tooling.
 - Do not modify application logic or existing tests merely to satisfy new tooling.
 
-## Discuss capabilities conversationally
+## Configure capabilities interactively
 
-Adoption is a collaborative engineering discussion, not a fixed questionnaire
-and not a single all-or-nothing presentation of policy choices.
+Treat each applicable capability as an interactive project scaffolding step
+(like create-vite), not an open-ended requirements interview or a fixed
+multi-capability questionnaire. Discuss **one capability at a time**.
 
-After the initial inspection, discuss applicable capabilities **one at a time**,
-following their recipes. For each capability that needs a decision:
+Start from the **actual staged template configuration**, including rule values,
+severities and exclusions. For capabilities with adjustable policy, show a
+compact, editable proposal: the relevant rules, current template thresholds
+and severities. A table is useful when comparing several rule settings; avoid
+long explanations around it. For simpler capabilities, state the defaults
+without inventing options that do not exist.
 
-1. Briefly describe the evidence: what already exists, what is missing, and what
-   would need to change.
-2. Propose adopting the **entire relevant template policy** as one baseline:
-   configuration, rules, thresholds, and severities. State necessary project-specific
-   adaptations and any material trade-offs or existing-policy conflicts.
-3. Ask **one focused question about accepting the template baseline or a concrete
-   deviation**; wait for the human's response. Do not ask the human to invent
-   alternatives without first supplying the template recommendation.
-4. If the human says "adopt the template", treat the whole capability policy as
-   agreed, including severities and thresholds, except for explicitly discussed
-   conflicts. Do not reopen subchoices that the answer already settles.
-5. Retain the agreed choice for the combined integration plan, then move to the
-   next capability. Do not edit files, install dependencies, or execute commands
-   that write project files during this discussion.
+Give the human clear ways to respond in natural language:
 
-Do not present eight questions at once or turn the recipes into a compliance form.
-Do not ask for confirmation of inferred facts or routine implementation details.
-Do not default new lint/complexity rules to advisory merely to avoid discussing
-template blockers. An approved blocking rule that exposes existing debt is a
-reported blocker, not permission to silently refactor or suppress that debt.
-If a capability already satisfies established policy, acknowledge it briefly and
-move on without demanding a new decision. If inapplicable, state why.
-Related capabilities may be discussed together when separating them would repeat
-the same decision; do not skip a meaningful choice merely to shorten the discussion.
+- Accept the entire template baseline (e.g. "yes" or "use template defaults").
+- Change severities globally or for selected rules (e.g. "all warnings").
+- Change individual thresholds (e.g. "cognitive complexity 8").
+- Disable or exclude selected rules, where supported.
+- Restore the template defaults, or ask for more detail.
 
-Reuse existing documented and approved decisions. On subsequent runs, discuss
-only new, conflicting, or materially changed policies or integrations. Do not
-renegotiate unchanged choices, and do not interpret silence as approval.
+Interpret bulk changes as applying only to the current capability unless the
+human explicitly broadens their scope. Retain every unspecified value exactly
+as in the template. If a user changes one threshold, do not silently change
+its severity or unrelated rules.
+
+After a proposed change, show the **resulting configuration** (or concise
+changed values plus unchanged template defaults) and allow corrections.
+When the human accepts the capability, record all its rules, thresholds,
+severities, scope and exclusions as one agreed decision and move on.
+Do not repeatedly confirm individual rules after acceptance.
+
+For each capability, briefly identify existing coverage, necessary project
+adaptations and material risks. Preserve established project policy and
+stronger existing gates; explain concrete conflicts rather than replacing
+them silently. A template blocking rule that exposes existing debt remains
+a blocker unless the human chooses otherwise. Do not automatically refactor,
+format existing application code, suppress findings, or soften severity.
+
+Skip policy questions for capabilities already satisfying an approved policy.
+Mark genuinely inapplicable capabilities with a reason. Reuse documented
+decisions on repeat runs; ask only for new or materially changed choices.
+Do not equate silence with approval.
+
+Configuration discussion is **policy selection, not permission to implement**.
+Do not edit files, install dependencies, or execute commands that write project
+files until the final integration authorization. Do not create a CLI wizard,
+DSL, registry, recipe runner, or new persistent state mechanism.
 
 ## Confirm integration and execute
 
