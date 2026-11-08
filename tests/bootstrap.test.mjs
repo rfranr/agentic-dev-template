@@ -245,6 +245,7 @@ test('manifest covers maintained Skills, reusable scripts and root quality/build
     '.pi/settings.json',
     '.pi-lens.json',
     'adoption/TASK.md',
+    ...readdirSync(path.join(template, 'adoption/checks')).map((name) => `adoption/checks/${name}`),
   ];
 
   assert.deepEqual(manifest.map((resource) => resource.source).sort(), expected.sort());
@@ -253,9 +254,11 @@ test('manifest covers maintained Skills, reusable scripts and root quality/build
     const expectedDestination =
       resource.kind === 'staged' ? `.agentic-adoption/staging/${resource.source}` : resource.source;
 
-    if (resource.source !== 'adoption/TASK.md') {
-      assert.equal(resource.destination, expectedDestination);
-    }
+    const destination = resource.source.startsWith('adoption/')
+      ? resource.source.replace('adoption/', '.agentic-adoption/')
+      : expectedDestination;
+
+    assert.equal(resource.destination, destination);
   }
 });
 
@@ -306,23 +309,67 @@ test('external methodology is delivered unchanged with complete approval and val
     'tests',
     'build system',
     'CI',
-    'interactive quality-policy wizard',
+    'Do not conduct a multi-question quality-policy wizard',
     'explicit human approval BEFORE',
     'dependency changes',
     'thresholds',
     'advisory reports',
     'Validation and completion',
     'RESULT.json',
-    'metrics/metrics:html',
+    'checks/metrics.md',
     'total/maximum cognitive complexity',
     'fresh Pi session',
     'trusting/loading',
     'actual delivered tools',
+    'silence is not approval',
+    'do not create an adoption database or lockfile',
   ]) {
     assert.ok(task.includes(expected), expected);
   }
 
   assert.doesNotMatch(readFileSync(bootstrap, 'utf8'), /# Adopt agentic|interactive quality-policy wizard/);
+});
+
+test('installed orchestrator links every focused recipe and recipe conflicts remain safe', (context) => {
+  const target = temporaryProject(context);
+  const names = [
+    'formatting',
+    'lint',
+    'complexity',
+    'metrics',
+    'dependencies',
+    'structure',
+    'tests-build',
+    'aggregate',
+  ];
+  const conflict = '.agentic-adoption/checks/lint.md';
+
+  put(target, conflict, 'approved project recipe');
+  assert.equal(run(target).status, 1);
+  assert.equal(readFileSync(path.join(target, conflict), 'utf8'), 'approved project recipe');
+
+  const task = readFileSync(path.join(target, taskPath), 'utf8');
+
+  for (const name of names) {
+    const relative = `checks/${name}.md`;
+    const source = `adoption/${relative}`;
+    const destination = `.agentic-adoption/${relative}`;
+
+    assert.ok(task.includes(`](${relative})`), relative);
+    assert.ok(existsSync(path.resolve(target, path.dirname(taskPath), relative)), relative);
+    assert.ok(manifest.some((resource) => resource.source === source && resource.destination === destination));
+
+    const recipe = readFileSync(path.join(template, source), 'utf8');
+
+    for (const heading of ['Detect', 'Reconcile', 'Apply', 'Verify', 'Repeatability']) {
+      assert.ok(recipe.includes(`## ${heading}`), `${source}: ${heading}`);
+    }
+  }
+
+  const before = snapshot(target);
+
+  assert.equal(run(target).status, 1);
+  assert.deepEqual(snapshot(target), before);
 });
 
 test('missing sources, including a late resource, prevent all writes and target creation', (context) => {

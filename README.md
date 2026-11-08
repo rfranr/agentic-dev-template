@@ -79,7 +79,9 @@ paths. It does not execute tooling, edit application files, modify existing pack
 files or quality configurations, or run installation commands.
 
 The [adoption methodology](adoption/TASK.md) is copied unchanged to
-`.agentic-adoption/TASK.md`. Generated project-specific information is separate:
+`.agentic-adoption/TASK.md`, with focused recipes copied explicitly to
+`.agentic-adoption/checks/`. The task links those recipes using relative paths.
+Generated project-specific information is separate:
 `.agentic-adoption/RESULT.json` records each manifest resource's source, destination,
 kind and outcome. `installed` means copied or already identical; `conflict` means
 preserved, not installed. Terminal output distinguishes copied and identical files.
@@ -112,9 +114,23 @@ the target project and ask:
 
 ```text
 Read .agentic-adoption/TASK.md and existing project instructions. Inspect the
-project, conduct the interactive quality-policy wizard, and propose an adaptation
-plan. Wait for my approval before changing files or installing dependencies.
+project and relevant recipes, preserve approved policies, and propose only necessary
+integration changes. Wait for my explicit approval before changing files or installing
+dependencies. Do not conduct a fixed policy wizard.
 ```
+
+The task orchestrates inspection, reconciliation, one conversational approval, approved
+adaptations, and validation. Recipes cover formatting, lint, cognitive complexity,
+TypeScript metrics (including HTML), dependencies, structure, tests/build, and aggregate
+checks. Each explains detection, reconciliation, application, verification, and reruns.
+Existing scripts handle mechanical operations and report exit codes; Markdown is read
+directly, not executed by a recipe engine.
+
+Already integrated capabilities and unchanged approved policies remain untouched;
+partial integrations need only targeted changes. Explain conflicts or inapplicability.
+Do not reinstall dependencies, rewrite configuration, or repeat policy negotiations
+when nothing changed. New out-of-scope findings need approval only for that extension.
+Configuration and documented policy provide adoption evidence without a new state file.
 
 Copying and conflict detection are deterministic. Project inspection, policy and
 threshold choices, dependency installation, configuration integration, and validation

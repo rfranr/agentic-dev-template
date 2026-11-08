@@ -37,50 +37,80 @@ Review Pi package declarations before trusting/loading them: starting Pi may off
 to install third-party packages; bootstrap did not install or pin those packages.
 Do not install unreviewed packages or overwrite existing Pi settings.
 
-## Inspect first; obtain approval
+## Inspect, reconcile, and approve once
 
-1. Inspect the repository and its existing agent instructions, documentation, and
-   development workflow before proposing edits. Identify languages, package manager
-   and lockfiles, runtime environments, source layout, tests, build system, CI,
-   existing scripts/configurations, and current check coverage.
-2. Inspect every installed tool and staged reference configuration using the inventory.
-   Identify conflicts, missing dependencies, gaps, hard-coded paths, and integration
-   requirements. Do not mistake copied resources for integrated or validated tooling.
-3. Conduct an interactive quality-policy wizard with the human, not a silent policy
-   selection: discuss languages and paths to cover, runtime globals and exclusions,
-   formatting conventions, lint rules and complexity thresholds, blocking gates versus
-   advisory reports, existing technical debt, and test/build commands. Explain the
-   staged defaults and trade-offs; do not assume they are the project's policy.
-4. Present a concrete integration plan covering all prepared tooling, proposed
-   configuration and dependency changes, conflict resolutions, coverage, agreed
-   policy, validation commands, and any tooling considered inapplicable with reasons.
-   Do not silently omit tools or invent replacements for delivered scripts.
-5. Obtain explicit human approval BEFORE changing project-specific files,
-   installing packages, or running tooling that writes project files. Ask again
-   if new findings require changes outside the approved plan.
+Inspect existing agent instructions, approved policies, languages, runtime, package manager,
+source layout, tests, build system, CI, configurations, and command coverage.
+Read the inventory and these relative recipes (paths also resolve after installation):
 
-## Integrate all approved tooling
+- [Formatting](checks/formatting.md)
+- [Lint](checks/lint.md)
+- [Cognitive complexity](checks/complexity.md)
+- [TypeScript metrics](checks/metrics.md)
+- [Dependencies](checks/dependencies.md)
+- [Structure](checks/structure.md)
+- [Tests and build](checks/tests-build.md)
+- [Aggregate checks](checks/aggregate.md)
 
-- Adapt staged ESLint, Prettier and dependency-cruiser configurations to project paths
-  and runtimes. Do not blindly replace existing configurations.
-- Integrate the delivered cognitive complexity, structural analysis and aggregate
-  report scripts together, preserving their relative references or deliberately
-  updating them. Inspect the inventory for all reusable scripts to integrate.
-- Use staged package.json and package-lock.json as references for dependencies and
-  commands: check, check:report, complexity, metrics/metrics:html, dependencies,
-  structure, formatting, lint, tests and build. TypeScript metrics and the aggregate
-  check are package commands, not missing standalone scripts. Never replace the
-  project's package manifest or lockfile with these template snapshots.
-- Assess staged tsconfig.json and vite.config.ts as fixture-specific build references;
-  retain the project's build system unless an approved change is needed. Preserve
-  useful testing/build capabilities, including browser testing when applicable.
-- Align coverage across lint, cognitive analysis, TypeScript metrics, dependencies,
-  structural filters, formatting, tests and build. Inspect hard-coded paths in scripts.
-- Reconcile Pi settings and feedback with approved tooling. Propose project-specific
-  agent instructions; template application fixtures and root instructions were not copied.
-- Integrate the actual delivered tools into the project's own workflow. Documentation
-  pointing to staged files alone is not completion. Preserve observable application
-  behavior and existing tests unless an approved task explicitly requires changes.
+For each capability, determine whether it is satisfied, missing, partial, conflicting,
+or genuinely inapplicable, with evidence and reasons. These are discussion aids, not
+machine-readable states. Existing configuration and documented policies are sufficient;
+do not create an adoption database or lockfile.
+
+Use the existing project as the primary source of truth.
+
+**Do not conduct a multi-question quality-policy wizard.**
+
+Apply the following decision principles when preparing the integration proposal:
+
+- Preserve existing conventions, tooling, commands, and quality gates.
+- Infer runtime, paths, globals, and package manager from the project.
+- Propose appropriate defaults only where no existing policy exists.
+- Introduce new complexity thresholds as advisory by default.
+- Report existing technical debt without automatically fixing it.
+- Never weaken existing blocking quality gates.
+- Do not introduce CI changes without explicit approval.
+- Do not install unreviewed Pi packages or optional native tooling.
+- Do not modify application logic or existing tests merely to satisfy new tooling.
+
+Present **one concise integration proposal** containing:
+
+1. What will be installed and integrated.
+2. Which existing project conventions will be preserved.
+3. Which new quality rules will be blocking versus advisory.
+4. Any meaningful conflicts, risks, or exceptions.
+5. The commands that will validate the integration.
+
+Obtain **explicit human approval BEFORE** modifying files, installing dependencies,
+or running commands that write project files. Ask for **one approval of the complete
+proposal**; silence is not approval. Include dependency changes, coverage gaps, and
+reasons for any inapplicable tooling. If nothing needs changing, report that outcome
+without repeating policy negotiations or dependency installation.
+
+Only ask individual questions when a genuine ambiguity, significant trade-off, or conflicting requirement cannot be resolved safely from existing project evidence.
+
+Do not ask the human to confirm inferred facts or routine defaults.
+
+After approval, proceed with integration and validation without requesting a second approval for the same decisions.
+
+If new findings require changes outside the approved scope, explain the difference and request additional approval only for those changes.
+
+## Apply approved adaptations
+
+Follow the recipes for applicable capabilities, making only necessary approved changes.
+Preserve already integrated tooling and unchanged approved decisions; do not rewrite
+configurations or reinstall dependencies on an unchanged rerun. Never replace project
+package files or lockfiles with staged snapshots. Align coverage across capabilities
+and explain exceptions rather than silently omitting tools.
+
+Keep mechanical installation, inventory, conflict detection, command execution,
+exit-code collection, and report generation in existing scripts. Use judgment for
+configuration adaptation, compatibility, coverage, and policy. No recipe runner is needed.
+
+Reconcile Pi settings and feedback with approved tooling and propose project-specific
+agent instructions. Template application fixtures and root instructions were not copied.
+Integrate the actual delivered tools into the workflow: documentation pointing to
+staged files alone is not completion. Preserve observable behavior and existing tests.
 
 ## Validation and completion
 
