@@ -309,9 +309,9 @@ test('external methodology is delivered unchanged with complete approval and val
     'tests',
     'build system',
     'CI',
-    'Do not conduct a multi-question quality-policy wizard',
-    'explicit human approval BEFORE',
-    'dependency changes',
+    'discuss applicable capabilities **one at a time**',
+    'explicit human authorization BEFORE',
+    'Dependency and configuration changes',
     'thresholds',
     'advisory reports',
     'Validation and completion',
@@ -321,7 +321,7 @@ test('external methodology is delivered unchanged with complete approval and val
     'fresh Pi session',
     'trusting/loading',
     'actual delivered tools',
-    'silence is not approval',
+    'do not interpret silence as approval',
     'do not create an adoption database or lockfile',
   ]) {
     assert.ok(task.includes(expected), expected);
