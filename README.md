@@ -113,10 +113,10 @@ allowing Pi to install third-party packages. Then start a **fresh** Pi session i
 the target project and ask:
 
 ```text
-Read .agentic-adoption/TASK.md and existing project instructions. Inspect the
-project and relevant recipes, preserve approved policies, and propose only necessary
-integration changes. Wait for my explicit approval before changing files or installing
-dependencies. Do not conduct a fixed policy wizard.
+Read .agentic-adoption/TASK.md and follow its adoption workflow.
+Respect existing project instructions and the decisions already approved.
+Do not modify files or install dependencies before the required approval.
+Start with the first step.
 ```
 
 The task orchestrates inspection, reconciliation, one conversational approval, approved
