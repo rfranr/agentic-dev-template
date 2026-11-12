@@ -2,6 +2,10 @@
 
 [README](../README.md)
 
+For the later standalone installer/Skill refactor and clean-project integration
+results, see [quality-gates validation](quality-gates-validation.md). The results
+below are historical extraction evidence.
+
 ## Scope
 
 Extracted from WorldGL revision `0f3f9ed` (the supplied checkout), following the

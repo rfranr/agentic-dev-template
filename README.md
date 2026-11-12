@@ -60,84 +60,50 @@ Choose either route:
 Neither route inherits the template's Git history. Rename the local directory
 as desired; do not copy the template's `.git` directory into your project.
 
-### Adopt into an existing project (experimental)
+### Install quality gates into an existing project
 
-Before starting Pi, run the standalone bootstrap with Node.js 24:
+The self-contained [quality-gates Skill](.pi/skills/quality-gates/SKILL.md) runs
+with Node.js 24, with or without Pi or another coding agent:
 
 ```sh
 node /absolute/path/to/agentic-dev-template/scripts/bootstrap.mjs /path/to/existing-project
+npm ci --prefix /path/to/existing-project/.pi/skills/quality-gates
+node /path/to/existing-project/.pi/skills/quality-gates/scripts/quality-gates.mjs --help
 ```
 
-No npm dependencies or Pi installation are needed for this command. The explicit
-[resource manifest](adoption/resources.json) is the installation inventory: each
-entry names a source, destination, and `direct` or `staged` kind. Additions and
-removals require manifest edits; bootstrap never recursively discovers resources.
-It delivers bundled Skills into `.pi/skills/`, prepares `.pi/settings.json` and
-`.pi-lens.json`, and snapshots actual quality scripts, configurations, and package
-command/dependency references under `.agentic-adoption/staging/`, preserving relative
-paths. It does not execute tooling, edit application files, modify existing package
-files or quality configurations, or run installation commands.
+The installer needs no npm dependencies. It copies only the Skill: its standalone
+CLI, four tooling modules, existing quality policies, and private dependency
+manifest/lockfile. It does not copy other Skills, Pi settings, application fixtures,
+agent tasks, or staging references. The old adoption wizard and staging mechanism
+have been removed; existing `.agentic-adoption` directories are left untouched.
 
-The [adoption methodology](adoption/TASK.md) is copied unchanged to
-`.agentic-adoption/TASK.md`, with focused recipes copied explicitly to
-`.agentic-adoption/checks/`. The task links those recipes using relative paths.
-Generated project-specific information is separate:
-`.agentic-adoption/RESULT.json` records each manifest resource's source, destination,
-kind and outcome. `installed` means copied or already identical; `conflict` means
-preserved, not installed. Terminal output distinguishes copied and identical files.
-The result does not inventory itself; its status appears in terminal output.
+Installation preflights every bundled source and destination. Identical files are
+not rewritten; any conflict stops **all** copies. Nothing is merged, upgraded or
+silently overwritten. Missing sources, overlapping source/target roots, source
+symlinks, and symlinked destinations/ancestors are rejected. Unexpected I/O failures
+can leave earlier copies; no rollback or concurrent-edit safety is promised.
+Exit status is 0 for success and 1 for conflicts/errors.
 
-Bootstrap validates the entire plan before writing: sources must be available
-regular files, paths must stay within their roots, destinations must not overlap,
-and staged resources must retain their relative paths. Source/target overlap and
-symlinked target paths are rejected. Symlinks at source paths are rejected; symlinks
-inside the target are preserved as conflicts, never followed.
+Dependency setup is a separate explicit operation confined to the Skill. The target
+manifest, lockfile, quality configs and package scripts are not integrated or
+rewritten. No plugin framework, policy registry, migration engine or agent approval
+conversation runs during installation. Review trusted configurations and delegated
+project scripts before executing them.
 
-- Invalid plans or missing sources stop with no writes, even to a new target directory.
-- Expected conflicts are identified before copying. Conflicting paths remain untouched;
-  other resources are installed. Bootstrap does not merge or upgrade existing files.
-- Identical resources remain untouched. Unchanged reruns preserve file bytes and
-  modification times, including the generated result.
-- Conflicting task/result files are preserved; proposed contents are printed. Use that
-  terminal output rather than a potentially stale on-disk result.
-- Unexpected I/O errors stop installation without rollback. Earlier copies remain;
-  resolve the error and rerun. Do not concurrently edit the source or destination
-  during bootstrap; this is not a transactional installer.
+For example, using project directories `lib/` and `spec/`:
 
-Exit status is 0 on success, 1 for conflicts or errors. Resolve conflicts manually
-and rerun before adoption, or give the agent the printed result for an approved
-resolution plan.
-
-Review the prepared files and Pi package declarations before granting trust or
-allowing Pi to install third-party packages. Then start a **fresh** Pi session in
-the target project and ask:
-
-```text
-Read .agentic-adoption/TASK.md and follow its adoption workflow.
-Respect existing project instructions and the decisions already approved.
-Do not modify files or install dependencies before the required approval.
-Start with the first step.
+```sh
+node /path/to/existing-project/.pi/skills/quality-gates/scripts/quality-gates.mjs lint \
+  --root /path/to/existing-project --input lib --input spec \
+  --node-files 'lib/**/*.ts' --node-files 'spec/**/*.ts'
 ```
 
-The task orchestrates inspection, reconciliation, one conversational approval, approved
-adaptations, and validation. Recipes cover formatting, lint, cognitive complexity,
-TypeScript metrics (including HTML), dependencies, structure, tests/build, and aggregate
-checks. Each explains detection, reconciliation, application, verification, and reruns.
-Existing scripts handle mechanical operations and report exit codes; Markdown is read
-directly, not executed by a recipe engine.
-
-Already integrated capabilities and unchanged approved policies remain untouched;
-partial integrations need only targeted changes. Explain conflicts or inapplicability.
-Do not reinstall dependencies, rewrite configuration, or repeat policy negotiations
-when nothing changed. New out-of-scope findings need approval only for that extension.
-Configuration and documented policy provide adoption evidence without a new state file.
-
-Copying and conflict detection are deterministic. Project inspection, policy and
-threshold choices, dependency installation, configuration integration, and validation
-remain the agent's responsibility after human approval. Staged package files and
-TypeScript/Vite configurations are references, not replacements for the project's
-manifest, lockfile, or build system. Template fixtures and root agent instructions
-are not installed.
+Supply actual roots, paths, runtime bindings, optional configuration paths and
+existing verification scripts explicitly. Bundled policies apply by default;
+existing target quality configs are not loaded implicitly. See the Skill for
+all commands, severity semantics, resolution boundaries and supported inputs.
+[Integration validation](docs/quality-gates-validation.md) records actual results
+against the template fixture and a clean `memory-cli` checkout.
 
 ### 3. Improve the template itself
 
@@ -310,8 +276,9 @@ All command names below are invoked with `npm run`, for example `npm run lint`.
 
 Formatting scans `src/` and `tests/` for `.ts`, `.js`, and `.mjs`. Lint and cognitive
 analysis cover both directories; lint additionally covers all maintained code in
-`scripts/`, with Node.js globals scoped to those scripts. Reporting scripts and
-configuration are not added to formatting coverage. TypeScript includes `src`
+`scripts/` and the quality-gates Skill scripts/ESLint policy, with Node.js globals
+scoped to maintained scripts. Maintained reporting/installer scripts and the quality-gates Skill scripts/configs
+are also formatted by the template's maintenance commands. TypeScript includes `src`
 and `tests`.
 
 Metrics scan both directories, but `tsmetrics` skips `.mjs`; ESLint/cognitive

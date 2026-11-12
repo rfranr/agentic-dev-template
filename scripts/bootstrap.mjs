@@ -1,10 +1,29 @@
-import { constants, copyFileSync, lstatSync, mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import { constants, copyFileSync, lstatSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
 import path from 'node:path';
-import { Buffer } from 'node:buffer';
 import { fileURLToPath } from 'node:url';
 
 const template = realpathSync(fileURLToPath(new URL('..', import.meta.url)));
-const resultPath = '.agentic-adoption/RESULT.json';
+const skill = '.pi/skills/quality-gates';
+// The distribution is deliberately bounded: no installed dependencies, other Skills,
+// Pi settings, target configuration, or generated reports are copied.
+const resources = [
+  'SKILL.md',
+  '.gitignore',
+  'package.json',
+  'package-lock.json',
+  'config/eslint.mjs',
+  'config/prettier.json',
+  'config/dependency-cruiser.cjs',
+  'scripts/quality-gates.mjs',
+  'scripts/options.mjs',
+  'scripts/process.mjs',
+  'scripts/style.mjs',
+  'scripts/cognitive.mjs',
+  'scripts/architecture.mjs',
+  'scripts/structure.mjs',
+  'scripts/metrics.mjs',
+  'scripts/verify.mjs',
+];
 
 function existingStatus(filename) {
   try {
@@ -39,11 +58,7 @@ function safePath(filename) {
 
     const status = existingStatus(current);
 
-    if (!status) {
-      continue;
-    }
-
-    if (unsafeComponent(status, index < components.length - 1)) {
+    if (status && unsafeComponent(status, index < components.length - 1)) {
       return false;
     }
   }
@@ -52,73 +67,24 @@ function safePath(filename) {
 }
 
 function resolveTarget(argument) {
-  const requested = path.resolve(argument);
+  const target = path.resolve(argument);
 
-  if (!safePath(requested)) {
+  if (!safePath(target)) {
     throw new Error('Unsafe target path: symlink or non-directory ancestor.');
   }
-
-  let ancestor = requested;
-
-  while (!existingStatus(ancestor)) {
-    ancestor = path.dirname(ancestor);
-  }
-
-  const target = path.resolve(realpathSync(ancestor), path.relative(ancestor, requested));
 
   if (overlaps(template, target) || overlaps(target, template)) {
     throw new Error('Target and source template must not overlap.');
   }
 
-  const targetIsDirectory = existingStatus(target)?.isDirectory() ?? true;
-
-  if (!targetIsDirectory) {
+  if (existingStatus(target) && !existingStatus(target).isDirectory()) {
     throw new Error('Target must be a directory.');
   }
 
   return target;
 }
 
-function validateRelativePath(relative) {
-  if (typeof relative !== 'string' || relative.includes('\\') || relative.includes('\0')) {
-    throw new Error(`Invalid manifest path: ${relative}`);
-  }
-
-  if (path.posix.isAbsolute(relative) || path.win32.isAbsolute(relative)) {
-    throw new Error(`Absolute manifest path: ${relative}`);
-  }
-
-  if (relative.split('/').some((component) => ['', '.', '..'].includes(component))) {
-    throw new Error(`Unsafe manifest path: ${relative}`);
-  }
-}
-
-function validateResource(resource) {
-  validateRelativePath(resource.source);
-  validateRelativePath(resource.destination);
-
-  if (!['direct', 'staged'].includes(resource.kind)) {
-    throw new Error(`Invalid resource kind: ${resource.kind}`);
-  }
-
-  if (resource.kind === 'staged' && resource.destination !== `.agentic-adoption/staging/${resource.source}`) {
-    throw new Error(`Staged resource must preserve its relative path: ${resource.source}`);
-  }
-}
-
-function readSource(relative) {
-  const filename = path.join(template, relative);
-
-  if (!safePath(filename) || !existingStatus(filename)?.isFile()) {
-    throw new Error(`Missing or unsafe template resource: ${relative}`);
-  }
-
-  return readFileSync(filename);
-}
-
-function destinationStatus(target, relative, contents) {
-  const filename = path.join(target, relative);
-
+function destinationStatus(filename, contents) {
   if (!safePath(filename)) {
     return 'conflict';
   }
@@ -133,89 +99,56 @@ function destinationStatus(target, relative, contents) {
 }
 
 function preparePlan(target) {
-  const resources = JSON.parse(readSource('adoption/resources.json'));
-  const destinations = [resultPath];
-  const plan = [];
+  return resources.map((relative) => {
+    const source = path.join(template, skill, relative);
+    const destination = path.join(target, skill, relative);
 
-  for (const resource of resources) {
-    validateResource(resource);
-
-    if (destinations.some((name) => overlaps(name, resource.destination) || overlaps(resource.destination, name))) {
-      throw new Error(`Overlapping manifest destination: ${resource.destination}`);
+    if (!safePath(source) || !existingStatus(source)?.isFile()) {
+      throw new Error(`Missing or unsafe Skill resource: ${relative}`);
     }
 
-    destinations.push(resource.destination);
+    const contents = readFileSync(source);
 
-    const contents = readSource(resource.source);
-    const status = destinationStatus(target, resource.destination, contents);
-
-    plan.push({ ...resource, contents, status });
-  }
-
-  return plan;
+    return { relative, source, destination, contents, status: destinationStatus(destination, contents) };
+  });
 }
 
-function prepareResult(target, plan) {
-  // Stable outcomes, not per-run actions: identical reruns must not rewrite this file.
-  const inventory = plan.map(({ source, destination, kind, status }) => ({
-    source,
-    destination,
-    kind,
-    status: status === 'conflict' ? 'conflict' : 'installed',
-  }));
-  const contents = Buffer.from(`${JSON.stringify({ resources: inventory }, null, 2)}\n`);
+function installResource(resource) {
+  const { destination, source, contents, status } = resource;
 
-  return { destination: resultPath, contents, status: destinationStatus(target, resultPath, contents) };
-}
-
-function createResource(target, resource) {
-  const filename = path.join(target, resource.destination);
-
-  mkdirSync(path.dirname(filename), { recursive: true });
-
-  if (resource.source) {
-    copyFileSync(path.join(template, resource.source), filename, constants.COPYFILE_EXCL);
-  } else {
-    writeFileSync(filename, resource.contents, { flag: 'wx' });
-  }
-}
-
-function installResource(target, resource) {
-  const { destination, contents, status } = resource;
-
-  // Recheck before writing; exclusive creation also prevents replacing a new leaf file.
-  if (destinationStatus(target, destination, contents) !== status) {
+  if (destinationStatus(destination, contents) !== status) {
     throw new Error(`Destination changed during installation: ${destination}`);
   }
 
   if (status === 'missing') {
-    createResource(target, resource);
+    mkdirSync(path.dirname(destination), { recursive: true });
+    copyFileSync(source, destination, constants.COPYFILE_EXCL);
   }
 
-  console.log(`${status === 'missing' ? 'copied' : status}: ${destination}`);
-
-  if (status === 'conflict' && destination.startsWith('.agentic-adoption/') && resource.kind !== 'staged') {
-    console.log(`Proposed ${destination} (existing path preserved):\n${contents.toString()}`);
-  }
+  console.log(`${status === 'missing' ? 'copied' : status}: ${skill}/${resource.relative}`);
 }
 
 function bootstrap(argument) {
   const target = resolveTarget(argument);
   const plan = preparePlan(target);
-  const result = prepareResult(target, plan);
-  const installation = [...plan, result];
-  const conflicts = installation.filter((resource) => resource.status === 'conflict');
-
-  // All sources and destinations have been checked before the first directory or file is created.
-  console.log(`Preflight: ${plan.length} resources, ${conflicts.length} conflicts.`);
-
-  for (const resource of installation) {
-    installResource(target, resource);
-  }
+  const conflicts = plan.filter((resource) => resource.status === 'conflict');
 
   if (conflicts.length > 0) {
-    process.exitCode = 1;
+    for (const resource of conflicts) {
+      console.error(`conflict: ${skill}/${resource.relative}`);
+    }
+
+    throw new Error('Conflicts found; no files copied. Resolve manually and rerun.');
   }
+
+  for (const resource of plan) {
+    installResource(resource);
+  }
+
+  console.log(`Ready: ${path.join(target, skill)}`);
+  console.log(
+    'Install dependencies explicitly with npm ci --prefix <Skill-directory>. No project packages were changed.',
+  );
 }
 
 try {
@@ -225,6 +158,6 @@ try {
 
   bootstrap(process.argv[2]);
 } catch (error) {
-  console.error(`Bootstrap stopped: ${error.message}. Earlier copies, if any, remain; no rollback.`);
+  console.error(`Bootstrap stopped: ${error.message}. Unexpected I/O errors may leave earlier copies; no rollback.`);
   process.exitCode = 1;
 }
